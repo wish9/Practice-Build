@@ -14,12 +14,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -45,10 +46,10 @@ class MemberControllerMockTest {
                                                     "010-1234-5678");
 
         Member member = mapper.memberPostToMember(post);
+        member.setMemberId(1L);
         member.setStamp(new Stamp());
 
-        given(memberService.createMember(Mockito.any()))
-                .willReturn(member);
+        given(memberService.createMember(Mockito.any())).willReturn(member);
 
         String content = gson.toJson(post);
 
@@ -63,13 +64,8 @@ class MemberControllerMockTest {
                                 );
 
         // then
-        MvcResult result = actions
-                                .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.data.email").value(post.getEmail()))
-                                .andExpect(jsonPath("$.data.name").value(post.getName()))
-                                .andExpect(jsonPath("$.data.phone").value(post.getPhone()))
-                                .andReturn();
-
-//        System.out.println(result.getResponse().getContentAsString());
+        actions
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", is(startsWith("/v11/members/"))));
     }
 }

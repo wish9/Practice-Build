@@ -26,6 +26,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
@@ -85,8 +86,8 @@ public class MemberControllerRestDocsTest {
                 .andExpect(jsonPath("$.data.name").value(post.getName()))
                 .andExpect(jsonPath("$.data.phone").value(post.getPhone()))
                 .andDo(document("post-member",
-                        getRequestPreProcessor(),
-                        getResponsePreProcessor(),
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
                         requestFields(
                                 List.of(
                                         fieldWithPath("email").type(JsonFieldType.STRING).description("이메일"),
@@ -112,7 +113,8 @@ public class MemberControllerRestDocsTest {
     public void patchMemberTest() throws Exception {
         // given
         long memberId = 1L;
-        MemberDto.Patch patch = new MemberDto.Patch(memberId, "홍길동", "010-1111-1111", Member.MemberStatus.MEMBER_ACTIVE);
+        MemberDto.Patch patch =
+                new MemberDto.Patch(memberId, "홍길동", "010-1111-1111", Member.MemberStatus.MEMBER_ACTIVE);
         String content = gson.toJson(patch);
 
         MemberDto.Response responseDto =
@@ -154,10 +156,14 @@ public class MemberControllerRestDocsTest {
                         ),
                         requestFields(
                                 List.of(
-                                        fieldWithPath("memberId").type(JsonFieldType.NUMBER).description("회원 식별자").ignored(),
+                                        fieldWithPath("memberId").type(JsonFieldType.NUMBER).description("회원 식별자")
+                                                                                                            .ignored(),
                                         fieldWithPath("name").type(JsonFieldType.STRING).description("이름").optional(),
-                                        fieldWithPath("phone").type(JsonFieldType.STRING).description("휴대폰 번호").optional(),
-                                        fieldWithPath("memberStatus").type(JsonFieldType.STRING).description("회원 상태: MEMBER_ACTIVE / MEMBER_SLEEP / MEMBER_QUIT").optional()
+                                        fieldWithPath("phone").type(JsonFieldType.STRING).description("휴대폰 번호")
+                                                                                                            .optional(),
+                                        fieldWithPath("memberStatus").type(JsonFieldType.STRING)
+                                                    .description("회원 상태: MEMBER_ACTIVE / MEMBER_SLEEP / MEMBER_QUIT")
+                                                    .optional()
                                 )
                         ),
                         responseFields(
@@ -167,7 +173,8 @@ public class MemberControllerRestDocsTest {
                                         fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
                                         fieldWithPath("data.name").type(JsonFieldType.STRING).description("이름"),
                                         fieldWithPath("data.phone").type(JsonFieldType.STRING).description("휴대폰 번호"),
-                                        fieldWithPath("data.memberStatus").type(JsonFieldType.STRING).description("회원 상태: 활동중 / 휴면 상태 / 탈퇴 상태"),
+                                        fieldWithPath("data.memberStatus").type(JsonFieldType.STRING)
+                                                .description("회원 상태: 활동중 / 휴면 상태 / 탈퇴 상태"),
                                         fieldWithPath("data.stamp").type(JsonFieldType.NUMBER).description("스탬프 갯수")
                                 )
                         )
